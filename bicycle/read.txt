@@ -1,0 +1,320 @@
+bean   放数据的封装类  -- Rider骑行用户   User管理员
+ui     界面
+main   主类包
+	   DataInit 数据初始化类
+buzz   接口包  首先创建Rider的接口  接口中包含了骑行用户的相关操作抽象方法
+buzz.impl  接口的实现包  在此包下 去规定具体的方法体
+util   工具包  放入一些通用的方法
+
+
+---初始化骑行用户数组 通过静态代码块实现
+
+---添加接口   Rider  Bicycle  多态的使用
+
+---创建单车接口 包含单车的查询和添加方法  创建单车交互类BicycleInteractive获取要新增的单车对象
+
+---将单车信息添加进 单车数组中  使用static静态代码块 实现单车数组的初始化
+
+---用户添加要求 姓名 性别 年龄 手机号.... 正则表达式
+	Pattern  正则表达式的编译表示形式
+	正则表达式的构造摘要
+	边界匹配器 行的开头^ 行的结尾$    ^...$
+	1.手机号  String phoneRegex = "^[1][3|4|5|7|8]\\d{9}$";
+	2.性别     String sexRegex = "^[男|女]$";
+	3.姓名     String nameRegex = "[\u4e00-\u9fa5]{2,4}";
+	4.年龄    16-32
+
+---单车部分增删改查
+1.将DataInit 单车数组转换成集合(List)
+public static List<Bicycle> bs = new ArrayList<Bicycle>();
+2.在单车集合中初始化3个对象
+3.完成单车查询
+	@Override
+	public void getAll() {
+		System.out.println("单车编号\t骑行时长\t单车名称\t单价\t经度\t纬度");
+		for (Bicycle b : DataInit.bs) {
+			System.out.println(b.getNo()+"\t"+b.getUtilitySecond()+"\t"+
+					b.getBt().getName()+"\t"+b.getBt().getCost()+"\t"+
+					b.getCd().getLongitude()+"\t"+b.getCd().getLatitude());
+		}
+	}
+4.在run类中进行调用
+		case 1:
+			//单车查询
+			bb.getAll();
+			this.bicycleOp();
+			break;
+5.单车添加 创建单车的数据交互类  作用是将键盘输入的单车信息封装成单车对象
+	public static Bicycle addBicycle(){
+		//系统自动生成单车编号
+		String no = NumberUtil.getBicycleNo();
+		//骑行时间为0
+		long time = 0l;
+		System.out.println("请输入单车名称:");
+		String name = InputUtil.getString();
+		System.out.println("请输入单车单价:");
+		double cost = InputUtil.getDouble();
+		//系统随机生成的单车坐标
+		double longitude = NumberUtil.getCoor();
+		double latitude = NumberUtil.getCoor();
+		//创建单车对象 将数据封装进去
+		Bicycle b = new Bicycle(); 
+		b.setNo(no);
+		b.setUtilitySecond(time);
+		b.setBt(new BicycleType(name, cost));
+		b.setCd(new Coordinate(longitude, latitude));
+		return b;
+	}
+6.在单车接口和实现类完成add方法
+	@Override
+	public void add() {
+		Bicycle b = BicycleInteractive.addBicycle();
+		//将单车对象b添加进集合中
+		DataInit.bs.add(b);
+	}
+7.在run类中调用单车添加方法
+8.完成单车的删除功能 要在接口BicycleBuzz和实现类BicycleBuzzImpl中 添加单车的删除方法
+	接口中:
+		//单车删除
+		void delete();
+		//根据单车编号查询单车
+		Bicycle getBicycleByNo(String no);
+	实现类:
+		/*
+		 * 单车删除
+		 * 需要参数:单车编号
+		 * 根据单车编号 来删除对应的单车
+		 * (non-Javadoc)
+		 * @see com.hotmarzz.bicycle.buzz.BicycleBuzz#delete()
+		 */
+		@Override
+		public void delete() {
+			System.out.println("请输入要删除的单车编号:");
+			String no = InputUtil.getString();
+			Bicycle b = this.getBicycleByNo(no);
+			DataInit.bs.remove(b);
+		}
+		/**
+		 * 根据单车编号查询指定单车
+		 */
+		@Override
+		public Bicycle getBicycleByNo(String no) {
+			// 遍历单车集合 找到对应单车编号
+			for (Bicycle b : DataInit.bs) {
+				// 当对应单车存在时 返回单车对象
+				if (b.getNo().equals(no)) {
+					return b;
+				}
+				// 如果不存在这辆单车 则返回null
+			}
+			return null;
+		}
+9.在run类中 调用
+10.单车修改 单条修改 在接口和实现类中 定义update方法
+	接口中:
+		//单车修改 价格 时长
+		void update();
+	实现类:
+		@Override
+		public void update() {
+			System.out.println("请输入修改单车编号:");
+			String no = InputUtil.getString();
+			Bicycle b = this.getBicycleByNo(no);
+			System.out.println("请选择修改内容:1、价格   2、时长");
+			int a = InputUtil.getInt();
+			switch (a) {
+			case 1:
+				//修改价格
+				System.out.println("请输入修改后的价格:");
+				double cost = InputUtil.getDouble();
+				b.setBt(new BicycleType(b.getBt().getName(), cost));
+				break;
+			case 2:
+				//修改时长
+				System.out.println("请输入修改后的时长:");
+				long time = InputUtil.getLong();
+				b.setUtilitySecond(time);
+				break;
+			default:
+				break;
+			}
+		}
+11.在run类中调用
+		case 3:
+			//单车修改(价格,时长)
+			bb.update();
+			this.bicycleOp();
+			break;
+		case 4:
+			//单车删除
+			bb.delete();
+			this.bicycleOp();
+			break;
+---骑行用户和单车管理类似			
+---模拟租车(每一次租车会产生一条骑行记录)
+1.创建骑行记录的封装类 RidingRecord
+	//骑行用户
+	private Rider rider;
+	//单车用户
+	private Bicycle bicycle;
+	//开始坐标
+	private Coordinate startCoord;
+	//结束坐标
+	private Coordinate endCoord;
+	//开始时间
+	private Date startTime;
+	//结束时间
+	private Date endTime;
+	//总花费
+	private double cost;
+2.在DataInit中创建骑行记录的集合
+	//定义骑行记录静态集合
+	public static List<RidingRecord> rr = new ArrayList<RidingRecord>();
+3.开始租车 创建接口和实现类
+	接口:
+		//开始租车  人和车
+		RidingRecord startRenta(Rider rider,Bicycle bicycle);
+		//结束租车
+		void endRenta(RidingRecord rr);
+		//租车费用计算
+		double getCost(Date startTime,Date endTime,Bicycle b);
+	实现:
+		@Override
+		public RidingRecord startRenta(Rider rider, Bicycle bicycle) {
+			//创建骑行记录对象
+			RidingRecord rr = new RidingRecord();
+			//确定了骑行记录中的骑行用户
+			rr.setRider(rider);
+			//确定了骑行记录中的单车
+			rr.setBicycle(bicycle);
+			//确定了骑行记录中的开始时间
+			rr.setStartTime(new Date());
+			//确定了骑行记录中的开始坐标
+			rr.setStartCoord(new Coordinate(NumberUtil.getCoor(), NumberUtil.getCoor()));
+			return rr;
+		}
+	
+		@Override
+		public void endRenta(RidingRecord rr) {
+			//确定了骑行记录中的结束时间
+			rr.setEndTime(new Date());
+			//确定了骑行记录中的结束坐标
+			rr.setEndCoord(new Coordinate(NumberUtil.getCoor(), NumberUtil.getCoor()));
+			//总费用
+			rr.setCost(this.getCost(rr.getStartTime(), rr.getEndTime(), rr.getBicycle()));
+			//将产生的骑行记录添加到集合中
+			DataInit.rr.add(rr);
+			System.out.println("车辆上锁,用车结束...");
+			//添加线程的睡眠方法  自带异常 需要处理
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("扣除用户"+rr.getRider().getPhone()+" 金额:"+rr.getCost());
+		}
+	
+		//费用计算 结束时间-开始时间 * 单价
+		@Override
+		public double getCost(Date startTime,Date endTime,Bicycle b) {
+			//将得到的毫秒数转换成半小时
+			double dou = (double)(endTime.getTime()-startTime.getTime())/1000/60/30;
+			return Math.ceil(dou)*b.getBt().getCost();
+		}
+4.在run类中进行租车方法调用
+		//租车
+		public void RentaOp() throws InterruptedException{
+			System.out.println("获取租车人手机号码:");
+			String phone = InputUtil.getString();
+			//根据手机号查询用户
+			Rider r = rb.getRiderByPhone(phone);
+			//判断手机号是否存在
+			if(r==null){
+				System.out.println("该用户不存在...");
+				return;
+			}
+			System.out.println("获取单车编号:");
+			String no = InputUtil.getString();
+			//根据单车编号查询单车
+			Bicycle b = bb.getBicycleByNo(no);
+			//判断单车是否存在
+			if(b==null){
+				System.out.println("单车编号错误...");
+				return;
+			}
+			//开始租车 并返回一条骑行记录
+			RidingRecord rr = renb.startRenta(r, b);
+			System.out.println("3");
+			Thread.sleep(1000);
+			System.out.println("2");
+			Thread.sleep(1000);
+			System.out.println("1");
+			Thread.sleep(1000);
+			System.out.println("开锁成功,车辆开始使用...");
+			System.out.println("输入1,结束用车...");
+			String s = InputUtil.getString();
+			if("1".equals(s)){
+				//结束租车
+				renb.endRenta(rr);
+			}
+		}
+5.完成骑行历史的查询  1.查询全部 2.根据手机号查询 3.根据单车号查询(自己完成)
+---使用xml来存储管理员信息
+1.创建admin.xml
+
+2.读取xml文件信息
+
+3.修改xml文件信息  (io流) 将代码中的修改的参数写入到xml文件中  输出过程 out
+
+4.从无到有 去创建一个xml文件
+
+---jdbc操作数据库
+1.完成骑行用户的增删改查  DataInit  数据存放在数据库表  bicycle
+
+2.运用jdbc批处理  完成 批量删除
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
