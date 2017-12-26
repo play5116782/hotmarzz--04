@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<admins> 
+  <admin name="1"> 
+    <loginname>123</loginname>  
+    <password>123</password>  
+    <maxlogin>10</maxlogin> 
+  </admin> 
+</admins>
